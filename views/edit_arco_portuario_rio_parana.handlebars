@@ -1,0 +1,111 @@
+<style>
+	input.valor {
+		width: 150px
+	}
+</style>
+<h2>ARCO PORTUARIO DEL RIÓ PARANÁ</h2>
+<form id=informe method=POST action="arco_portuario_rio_parana/submit-form" enctype="multipart/form-data">
+	<label for=fecha>Fecha:</label>
+	<input type=date id=fecha name=fecha value="{{fecha}}"><br>
+	<h3>Situación General</h3>
+	<textarea class=rich name=situacion_general id=situacion_general rows=4 columns=120 style="height:140; width:100%">{{situacion_general}}</textarea><br>
+	<table>
+		<tr>
+			
+			<td>
+				<img id=synop_presente src="{{synop_presente}}" alt="synop paraguay semana presente" style="width:600px" />
+				<br>
+				<span id=synop_presente_caption>Lluvias Semanales acumuladas al {{fecha}}</span> 
+			</td>
+			<td>
+				<textarea class=rich name=texto_mapa_semanal id=texto_mapa_semanal rows=14 columns=60 style="width:600px">{{texto_mapa_semanal}}</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for=smn_map_file>Mapa pronóstico trimestral SMN:</label><br>
+				<input id=smn_map_file type=file name=smn_map_file accept=".png" onchange="readUrl(this,'smn_map_file');" required="required">
+			</td>
+			<td>
+<!--
+				<label for=cptec_map_file>Mapa pronóstico trimestral CPTEC:</label><br>
+				<input id=cptec_map_file type=file name=cptec_map_file accept=".png" onchange="readUrl(this,'cptec_map_file');" required="required"><br>
+-->
+				Tendencia climática
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<img id=smn_map_file src="{{smn_map_file}}" alt="" />
+			</td>
+			<td>	
+				<textarea class=rich name=tendencia_climatica id=tendencia_climatica placeholder="tendencia climática" rows=4 columns=120 style="height:140; width:100%">{{tendencia_climatica}}</textarea>
+<!--
+				<img id=cptec_map_file src="{{cptec_map_file}}" alt="" /><br>
+-->
+			</td>
+		</tr>
+	</table>
+<!--
+	<textarea class=rich name=tendencia_climatica id=tendencia_climatica placeholder="tendencia climática" rows=4 columns=120 style="height:140; width:100%">{{tendencia_climatica}}</textarea><br>
+-->
+	<h3>Pronóstico meteorológico</h3>
+	<textarea class=rich name=pronostico_meteorologico id=pronostico_meteorologico placeholder="pronóstico meteorológico" rows=4 columns=120 style="height:140; width:100%">{{pronostico_meteorologico}}</textarea><br>
+	<h3>Perspectiva hidrométrica</h3>
+	<textarea class=rich name=perspectiva_hidrometrica id=perspectiva_hidrometrica placeholder="Perspectiva hidrométrica" rows=4 columns=120 style="height:140; width:100%">{{perspectiva_hidrometrica}}</textarea><br>
+	<h3>Niveles medios semanales (en metros):</h3>
+	<div>
+		<textarea id=hidro_area_semanal placeholder="Copiar tabla aquí" style="width:1330px; height: 175px"></textarea><br>
+		<table class=hidro_list id=niveles>
+			{{#each niveles}}
+				<tbody class="block" id="{{this.index}}">
+					<tr class=hidro_headers id={{this.index}}>
+						<th></th>
+						{{#each this.headers}}
+							<th colspan="3">{{this}}</th>
+						{{/each}}
+					</tr>
+					<tr class=hidro_headers_2 id="{{this.index}}">
+						<th>Semana al</th>
+						{{#each this.headers}}
+							<th>máx</th>
+							<th>med</th>
+							<th>mín</th>
+						{{/each}}
+					</tr>
+					{{#each this.data}}
+						<tr class=niveles>
+							<td>
+								<input type=date value="{{this.fecha}}" class=fecha placeholder="fecha" required="required">
+							</td>
+							{{#each this.niveles}}
+								<td>
+									<input type=number id={{this.estacion_id}} value="{{this.max}}" class=max placeholder="max" style="width:70"  step="0.01">
+								</td>
+								<td>
+									<input type=number id={{this.estacion_id}} value="{{this.valor}}" class=med placeholder="med" required="required" style="width:70"  step="0.01">
+								</td>
+								<td>
+									<input type=number id={{this.estacion_id}} value="{{this.min}}" class=min placeholder="min" style="width:70" step="0.01">
+								</td>
+							{{/each}}
+							<td>
+								<button type="button" class=delete><img src="img/del.png"  width=30 height=20 alt=eliminar /></button>
+							</td>
+						</tr>
+					{{/each}}
+				</tbody>
+			{{/each}}
+		</table>
+	</div>
+	<div id=submit>
+		<button type=button id=formsubmit>Generar informe</button>
+	</div>
+</form>
+	
+
+
+
+
+
+
