@@ -303,7 +303,7 @@ exports.generarInformeParaguay = function (pool,req,callback) {
 														console.log("Hidro inserted. Rows:" + hresult.length)
 														await client.query("COMMIT")
 														// INSERT_CORRIDAS DIARIO
-														const series_diario = [["bneg",1546, ["conc",1527], ["pilc",1525], ["form", 3127]]
+														const series_diario = [["bneg",1546], ["conc",1527], ["pilc",1525], ["form", 3127]]
 														for(var i=0, len = series_diario.length; i < len;i++) {
 															var key =  series_diario[i][0]
 															var data = hidro_diario.map( x => [x.fecha,x.fecha,x[key]] )
@@ -491,6 +491,8 @@ const insert_corridas = function (client,cal_id,series_id,data,options, callback
 			}
 			await client.query("insert into pronosticos (cor_id,series_id,timestart,timeend) select $1,$2,prono_tmp.timestart,prono_tmp.timeend from prono_tmp on conflict(cor_id,series_id,timestart,timeend,qualifier) do update set timestart=excluded.timestart",[corrida_id,series_id])
 			inserted = await client.query("insert into valores_prono_num (prono_id,valor) select pronosticos.id,value from prono_tmp,pronosticos where cor_id=$1 and series_id=$2 and pronosticos.timestart=prono_tmp.timestart on conflict(prono_id) do update set valor=excluded.valor RETURNING prono_id,valor",[corrida_id,series_id])
+			const date_range = await client.query("select update_series_puntual_prono_date_range($1)", [corrida_id])
+			console.debug(date_range.rows)
 			await client.query("COMMIT")
 			console.log("insert_corridas: commit exitoso!\n" + inserted.rows.length() + " registros insertados")
 		} catch(err) {

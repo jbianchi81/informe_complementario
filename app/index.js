@@ -695,11 +695,12 @@ const generarInformeParaguay = function (pool,req,callback) {
 											for (var i = 0, len = hidro_d.length; i< len;i++) {// var hresult = hidro.map( async (element,i ) => {
 												var count=0
 												for(let j of ["bneg","conc","pilc","form"]) {
-													if(! /^\d+(\.\d+)?$/.test(hidro_d[i][j])) {
+													if(! /^\-?\d+(\.\d+)?$/.test(hidro_d[i][j])) {
 														count++
 													}
 												}
 												if(count>0) { 
+													console.warn("Skipping row " + hidro_d[i].fecha_prono)
 													continue
 												}												
 												const h = await client.query("INSERT INTO informe_paraguay_prono_diario (fecha_informe, fecha, bneg, conc, pilc, form) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (fecha,fecha_informe) DO UPDATE SET bneg=excluded.bneg, conc=excluded.conc, pilc=excluded.pilc, form=excluded.form RETURNING fecha",[fields.fecha, hidro_d[i].fecha_prono, hidro_d[i].bneg, hidro_d[i].conc, hidro_d[i].pilc, hidro_d[i].form])
@@ -718,11 +719,12 @@ const generarInformeParaguay = function (pool,req,callback) {
 														for (var i = 0, len = hidro_m.length; i< len;i++) {// var hresult = hidro.map( async (element,i ) => {
 															var count=0
 															for(let j of ["bneg","conc","pilc","form"]) {
-																if(! /^\d+(\.\d+)?$/.test(hidro_m[i][j])) {
+																if(! /^\-?\d+(\.\d+)?$/.test(hidro_m[i][j])) {
 																	count++
 																}
 															}
 															if(count>0) { 
+																console.warn("Skipping row " + hidro_m[i].fecha_prono)
 																continue
 															}	
 															const h = await client.query("INSERT INTO informe_paraguay_prono_mensual (fecha_informe, mes, bneg, conc, pilc, form) VALUES ($1, $2::date - (extract(day from $2::date)-1 || ' days')::interval , $3, $4, $5, $6) ON CONFLICT (mes,fecha_informe) DO UPDATE SET bneg=excluded.bneg, conc=excluded.conc, pilc=excluded.pilc, form=excluded.form RETURNING mes",[fields.fecha, hidro_m[i].fecha_prono, hidro_m[i].bneg, hidro_m[i].conc, hidro_m[i].pilc, hidro_m[i].form])
@@ -948,6 +950,8 @@ const insert_corridas = async function (pool,cal_id,series_id,data,options, call
 			//~ console.log(prono_tmp)
 			await client.query("insert into pronosticos (cor_id,series_id,timestart,timeend) select $1,$2,prono_tmp.timestart,prono_tmp.timeend from prono_tmp on conflict(cor_id,series_id,timestart,timeend,qualifier) do update set timestart=excluded.timestart",[corrida_id,series_id])
 			inserted = await client.query("insert into valores_prono_num (prono_id,valor) select pronosticos.id,value from prono_tmp,pronosticos where cor_id=$1 and series_id=$2 and pronosticos.timestart=prono_tmp.timestart on conflict(prono_id) do update set valor=excluded.valor RETURNING prono_id,valor",[corrida_id,series_id])
+			const date_range = await client.query("select update_series_puntual_prono_date_range($1)", [corrida_id])
+			console.debug(date_range.rows)
 			await client.query("COMMIT")
 			console.log("insert_corridas: commit exitoso!\n" + inserted.rows.length + " registros insertados")
 		} catch(err) {
